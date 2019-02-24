@@ -19,6 +19,7 @@ class CheckViewController: UIViewController {
     var dateText:String? = ""
     var amountText:String? = ""
     var memoText:String? = ""
+    var editIndexPath:editIndexPath? = nil
     var appendHouseHoldItem: houseHoldItem?
     var fromButton:[buttonStatus] = []
     var toButton:[buttonStatus] = []
@@ -44,16 +45,32 @@ class CheckViewController: UIViewController {
                 purposeLabel.text = info.button!.titleLabel!.text!
             }
         }
-        appendListHouseHold()
     }
     
-    func appendListHouseHold() {
-        
+    @IBAction func recordButtonPush(_ sender: Any) {
         let newHouseHoldItem = houseHoldItem(from: fromLabel.text, to: toLabel.text, purpose: purposeLabel.text, memo: memoLabel.text, amount: amountLabel.text)
-        if listHouseHold!.keys.contains(dateLabel.text!) {
-            listHouseHold![dateLabel.text!]!.append(newHouseHoldItem)
+        if editIndexPath != nil {
+            if editIndexPath!.section! == dateLabel.text {
+                listHouseHold![editIndexPath!.section!]![editIndexPath!.row!] = newHouseHoldItem
+            } else {
+                listHouseHold![editIndexPath!.section!]!.remove(at: editIndexPath!.row!)
+                if listHouseHold![editIndexPath!.section!]!.count == 0 {
+                    print(listHouseHold!)
+                    listHouseHold![editIndexPath!.section!] = nil
+                }
+                if listHouseHold!.keys.contains(dateLabel.text!) {
+                    listHouseHold![dateLabel.text!]!.append(newHouseHoldItem)
+                } else {
+                    listHouseHold![dateLabel.text!] = [newHouseHoldItem]
+                }
+                
+            }
         } else {
-            listHouseHold![dateLabel.text!] = [newHouseHoldItem]
+            if listHouseHold!.keys.contains(dateLabel.text!) {
+                listHouseHold![dateLabel.text!]!.append(newHouseHoldItem)
+            } else {
+                listHouseHold![dateLabel.text!] = [newHouseHoldItem]
+            }
         }
     }
     

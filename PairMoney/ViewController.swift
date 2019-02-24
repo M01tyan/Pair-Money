@@ -14,6 +14,7 @@ enum actionTag: Int {
     case colorGreen = 2
     case colorYellow = 3
     case colorRed = 4
+    case colorGray = 5
 }
 
 struct buttonStatus {
@@ -22,6 +23,13 @@ struct buttonStatus {
 }
 
 class ViewController: UIViewController {
+    var editDate:String?
+    var editFromButtonIndex:Int?
+    var editToButtonIndex:Int?
+    var editPurposeButtonIndex:Int?
+    var editMemo:String?
+    var editAmount:String?
+    var editIndexPath:editIndexPath?
     
     func backgroundChange(color: String, pushButton: UIButton) {
         var red:CGFloat?
@@ -38,6 +46,8 @@ class ViewController: UIViewController {
             red = 255/255; green = 184/255; blue = 90/255
         case "Purple":
             red = 181/255; green = 108/255; blue = 255/255
+        case "Gray":
+            red = 67/255; green = 67/255; blue = 67/255
         default:
             red = 255/255; green = 255/255; blue = 255/255
         }
@@ -104,6 +114,7 @@ class ViewController: UIViewController {
                     case 0: color = "Green"
                     case 1: color = "Orange"
                     case 2: color = "Purple"
+                    case 3: color = "Gray"
                     default: return
                     }
                     backgroundChange(color: color!, pushButton: chengeButton.button!)
@@ -116,6 +127,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var amount: UITextField!
     @IBOutlet weak var memo: UITextField!
     @IBOutlet weak var date: UIDatePicker!
+    @IBOutlet weak var editBackButton: UIBarButtonItem!
+    @IBOutlet weak var editTitleLabel: UINavigationItem!
     override func viewDidLoad() {
         amount.keyboardType = UIKeyboardType.numberPad
         for button in fromButton {
@@ -125,23 +138,53 @@ class ViewController: UIViewController {
             toButtons.append(buttonStatus(button: button, pushed: false))
         }
         for button in object {
-         objectButtons.append(buttonStatus(button: button, pushed: false))
+            objectButtons.append(buttonStatus(button: button, pushed: false))
+        }
+        if editFromButtonIndex != nil {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MM/dd"
+            formatter.locale = Locale(identifier: "ja_JP")
+            let inputDate = formatter.date(from: editDate!)
+            date.date = inputDate!
+            editBackButton.isEnabled = true
+            editTitleLabel.title = "編集"
+            payments[editFromButtonIndex!].pushed = true
+            switch editFromButtonIndex! {
+            case 0: backgroundChange(color: "Blue", pushButton: payments[editFromButtonIndex!].button!)
+            default: backgroundChange(color: "Pink", pushButton: payments[editFromButtonIndex!].button!)
+            }
+            toButtons[editToButtonIndex!].pushed = true
+            switch editToButtonIndex! {
+            case 0: backgroundChange(color: "Green", pushButton: toButtons[editToButtonIndex!].button!)
+            case 1: backgroundChange(color: "Blue", pushButton: toButtons[editToButtonIndex!].button!)
+            default: backgroundChange(color: "Pink", pushButton: toButtons[editToButtonIndex!].button!)
+            }
+            objectButtons[editPurposeButtonIndex!].pushed = true
+            switch editPurposeButtonIndex! {
+            case 0: backgroundChange(color: "Green", pushButton: objectButtons[editPurposeButtonIndex!].button!)
+            case 1: backgroundChange(color: "Orange", pushButton: objectButtons[editPurposeButtonIndex!].button!)
+            case 2: backgroundChange(color: "Purple", pushButton: objectButtons[editPurposeButtonIndex!].button!)
+            default: backgroundChange(color: "Gray", pushButton: objectButtons[editPurposeButtonIndex!].button!)
+            }
+            amount.text = editAmount!
+            memo.text = editMemo!
         }
     }
     
+    @IBAction func backEditPage(_ sender: Any) {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
         let controller = segue.destination as! CheckViewController
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy/MM/dd"
+        formatter.dateFormat = "MM/dd"
         controller.dateText = formatter.string(from: date.date)
         controller.amountText = amount.text
         controller.memoText = memo.text
         controller.fromButton = payments
         controller.toButton = toButtons
         controller.objectButton = objectButtons
-    }
-    @IBAction func goToBack(_ sender: Any) {
-        self.dismiss(animated: true, completion: nil)
+        controller.editIndexPath = editIndexPath
     }
 }
